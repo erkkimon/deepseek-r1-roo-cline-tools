@@ -62,6 +62,9 @@ get_base_model() {
     fi
 }
 
+# Array to store tags for later removal.
+tags=()
+
 # Loop through each combination of size, quant variant, ctx, and temperature.
 for size in "${sizes[@]}"; do
     for quant in "${quant_variants[@]}"; do
@@ -109,6 +112,9 @@ for size in "${sizes[@]}"; do
                 
                 echo "Pushing ollama image with tag: ${tag}"
                 ollama push "$tag"
+                
+                # Save the tag for removal later.
+                tags+=("$tag")
                 echo "---------------------------------------------------------"
             done
         done
@@ -116,4 +122,12 @@ for size in "${sizes[@]}"; do
 done
 
 echo "All images have been created and pushed successfully."
+
+echo "Removing all created images locally using ollama rm..."
+for tag in "${tags[@]}"; do
+    echo "Removing image: ${tag}"
+    ollama rm "$tag"
+done
+
+echo "All local model versions have been removed."
 
